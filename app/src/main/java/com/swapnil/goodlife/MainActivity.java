@@ -1,13 +1,16 @@
 package com.swapnil.goodlife;
 
+import android.content.DialogInterface;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Date;
 
@@ -21,10 +24,13 @@ public class MainActivity extends AppCompatActivity {
     private TextView V_challenge_time;
     private TextView V_timer;
     private TextView V_timer_big;
+    private CountDownTimer cdTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        System.out.println("On Create");
+
         setContentView(R.layout.activity_main);
 
         try {
@@ -45,43 +51,57 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void playWithCountDownTimer(Date timeOfTimer) {
-        Date currentTime = new Date();
-        long millis = currentTime.getTime() - timeOfTimer.getTime();
-        millis = (24 * 60 * 60 * 1000) - millis;
-
-        new CountDownTimer(millis, 1000) {
-            public void onTick(long millisUntilFinished) {
-                long hrs = millisUntilFinished / (60*60*1000);
-                long mins = (millisUntilFinished / (60 * 1000)) % 60;
-                long secs = (millisUntilFinished / (1000)) % 60;
-
-                V_timer.setText("24/7 Timer: "+ hrs + ":" + mins + ":" + secs);
-                V_timer_big.setText(hrs + ":" + mins + ":" + secs);
-            }
-
-            public void onFinish() {
-               playWithCountDownTimer(user.getTimeOfLastUpdate());
-            }
-        }.start();
-    }
-
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         user.update();
         setValuesInApp();
-
-        //playWithCountDownTimer(user.getTimeOfLastUpdate());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        System.out.println("On Start");
 
         user.update();
         setValuesInApp();
-        playWithCountDownTimer(user.getTimeOfLastUpdate());
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        System.out.println("On Restart");
+    }
+
+    private long getMillis(Date timeCheckPoint) {
+        Date currentTime = new Date();
+        long millis = currentTime.getTime() - timeCheckPoint.getTime();
+        millis = (24 * 60 * 60 * 1000) - millis;
+        return millis;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("On Resume");
+
+        long millis = getMillis(user.getTimeOfLastUpdate());
+        this.cdTimer = giveMeCountDownTimer(millis);
+        this.cdTimer.start();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        System.out.println("On Stop");
+
+        this.cdTimer.cancel();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        System.out.println("On Pause");
     }
 
     private void setValuesInApp() {
@@ -94,23 +114,63 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickingBustedButton(View view) {
-        user.updateAfterFap();
-        setValuesInApp();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Confirmation");
+        builder.setMessage("So, you broke your streak today ?");
+        builder.setCancelable(false);
 
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                user.updateAfterFap();
+                setValuesInApp();
 
-        //playWithCountDownTimer(user.getTimeOfLastUpdate());
+                cdTimer.cancel();
+                long millis = getMillis(user.getTimeOfLastUpdate());
+                cdTimer = giveMeCountDownTimer(millis);
+                cdTimer.start();
+
+                Toast.makeText(getApplicationContext(), "Resist Temptations More Next Time!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(), "Glad to hear it!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        builder.show();
+    }
+
+    private CountDownTimer giveMeCountDownTimer(long millis) {
+        return new CountDownTimer(millis, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long hrs = millisUntilFinished / (60 * 60 * 1000);
+                long minutes = (millisUntilFinished / (60 * 1000)) % 60;
+                long secs = (millisUntilFinished / (1000)) % 60;
+
+                String msg = hrs + ":" + minutes + ":" + secs;
+                String msg24 = "24/7 Timer: " + msg;
+
+                V_timer.setText(msg24);
+                V_timer_big.setText(msg);
+            }
+
+            @Override
+            public void onFinish() {}
+        };
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         try {
             user.onShutdown(getApplicationContext());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
 }

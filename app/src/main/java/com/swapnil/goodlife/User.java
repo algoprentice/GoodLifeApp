@@ -48,7 +48,7 @@ public class User {
         long duration = currentTime.getTime() - this.timeOfLastUpdate.getTime();
 
         if(duration > 0) {
-            //Debug Code
+            /*Debug Code
             long durationInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
             if(durationInMinutes > 0) {
                 this.efficiency += durationInMinutes;
@@ -57,10 +57,10 @@ public class User {
                 calendar.add(Calendar.MINUTE, (int) durationInMinutes);
                 this.timeOfLastUpdate = calendar.getTime();
             }
-            //Debug Code
+            Debug Code*/
 
         }
-            /*
+            //
             long durationInDays = TimeUnit.MILLISECONDS.toDays(duration);
             if(durationInDays > 0) {
                 this.efficiency += durationInDays;
@@ -69,7 +69,7 @@ public class User {
                 calendar.add(Calendar.DATE, (int) durationInDays);
                 this.timeOfLastUpdate = calendar.getTime();
             }
-            */
+            //
     }
 
     public void updateAfterFap() {
@@ -82,21 +82,21 @@ public class User {
         //Updating loss & efficiency
         int prevEfficiency = this.efficiency;
 
-        //Debug Code
+        /*Debug Code
         if(currentStreak >= 3) {
             this.efficiency = Math.max(this.efficiency - 1, 0);
         } else {
             this.efficiency = Math.max(this.efficiency - (3 - currentStreak), 0);
         }
-        //Debug Code
+        Debug Code*/
 
-        /*
+        //
         if(currentStreak >= 7) {
             this.efficiency = Math.max(this.efficiency - 1, 0);
         } else {
             this.efficiency = Math.max(this.efficiency - (7 - currentStreak), 0);
         }
-        */
+        //
 
         this.loss = prevEfficiency - this.efficiency;
 
@@ -111,30 +111,30 @@ public class User {
         Date currentTime = new Date();
         long duration = currentTime.getTime() - this.timeOfLastFap.getTime();
 
-        //Debug Code
+        /*Debug Code
         long durationInMins = TimeUnit.MILLISECONDS.toMinutes(duration);
         return (int)durationInMins;
-        //Debug Code
+        Debug Code*/
 
-        /*
+        //
         long durationInDays = TimeUnit.MILLISECONDS.toDays(duration);
         return (int)durationInDays;
-        */
+        //
     }
 
     public int daysPassedSinceStart() {
         Date currentTime = new Date();
         long duration = currentTime.getTime() - this.timeOfInstall.getTime();
 
-        //Debug Code
+        /*Debug Code
         long durationInMins = TimeUnit.MILLISECONDS.toMinutes(duration);
         return (int)durationInMins;
-        //Debug Code
+        Debug Code*/
 
-        /*
+
         long durationInDays = TimeUnit.MILLISECONDS.toDays(duration);
         return (int)durationInDays;
-        */
+
     }
 
     public Date getTimeOfLastFap() { return this.timeOfLastFap; }
